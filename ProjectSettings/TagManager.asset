@@ -13,7 +13,7 @@ TagManager:
   - UI
   - Board
   - Ground
-  - Pieces
+  - Player
   - 
   - 
   - 
@@ -49,6 +49,9 @@ TagManager:
     locked: 0
   - name: Pieces
     uniqueID: 2400422453
+    locked: 0
+  - name: Player
+    uniqueID: 1124780025
     locked: 0
   m_RenderingLayers:
   - Default

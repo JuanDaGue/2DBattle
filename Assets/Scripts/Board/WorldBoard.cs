@@ -1,3 +1,5 @@
+using System.Collections;
+using System.IO;
 using UnityEngine;
 
 public class WorldBoard : MonoBehaviour
@@ -5,22 +7,27 @@ public class WorldBoard : MonoBehaviour
     [Header("Board Settings")]
     public int boardWidth = 10;
     public int boardHeight = 20;
-    
+
     [Header("References")]
     public GameObject boardTilePrefab;
     public Transform boardParent;
-    
-    [HideInInspector] public Transform[,] boardGrid;
+    // public Movement player1Movement;
+    // public Movement player2Movement;
+
+    Tile[,] boardGrid;
+    Block[,] pathGrid;
 
     void Start()
     {
         InitializeGrid();
         CreateBoardTiles();
+
     }
 
     private void InitializeGrid()
     {
-        boardGrid = new Transform[boardWidth, boardHeight];
+        boardGrid = new Tile[boardWidth, boardHeight];
+        pathGrid = new Block[boardWidth, boardHeight];
     }
 
     private void CreateBoardTiles()
@@ -29,7 +36,13 @@ public class WorldBoard : MonoBehaviour
         {
             for (int y = 0; y < boardHeight; y++)
             {
-                Instantiate(boardTilePrefab, new Vector3(x, y, 0), Quaternion.identity, boardParent);
+                var tile = Instantiate(boardTilePrefab, new Vector3(x, y, 0), Quaternion.identity, boardParent);
+
+                // tile.GetComponent<Tile>().Setup(x, y, this);
+                // boardGrid[x, y] = tile.transform;
+                boardGrid[x, y] = tile.GetComponent<Tile>();
+                boardGrid[x, y]?.Setup(x, y, this);
+
             }
         }
     }
@@ -39,44 +52,82 @@ public class WorldBoard : MonoBehaviour
         foreach (Transform block in piece)
         {
             Vector2Int pos = GetGridPosition(block.position);
-            
-            // Check boundaries
-            if (pos.x < 0 || pos.x >= boardWidth || pos.y < 0 || pos.y >= boardHeight) return false;
-            
-            // Check if position is occupied
-            if (pos.y < boardHeight && boardGrid[pos.x, pos.y] != null) return false;
+            if (!IsPositionValid(pos)) return false;
         }
         return true;
     }
-
-    public void PlacePiece(Transform piece)
+    public bool IsWalkable(Vector2Int position)
     {
-        foreach (Transform block in piece)
+        if (position.x < 0 || position.x >= boardWidth || position.y < 0 || position.y >= boardHeight) return false;
+        Debug.Log("Is walkable? " + pathGrid[position.x, position.y]);
+        return pathGrid[position.x, position.y] != null;
+    }
+    public void PlacePiece(PieceController pieceController)
+    {
+        Transform piece = pieceController.transform;
+        foreach (Transform blockTransform in piece.transform)
         {
+            Block block1 = blockTransform.GetComponent<Block>();
+            Vector2Int gridPos = GetGridPosition(blockTransform.position);
+            Debug.Log("Placing block at " + gridPos);
 
-            //Debug.Log("Placing block at: " + block.position);
-            Vector2Int gridPos = GetGridPosition(block.position);
-
-            if (gridPos.y < boardHeight)
+            if (IsPositionValid(gridPos))
             {
-                boardGrid[gridPos.x, gridPos.y] = block;
-                block.GetComponent<Block>().UpdateGridPosition();
-                Instantiate(block.gameObject, new Vector3(gridPos.x, gridPos.y, 0), Quaternion.identity, boardParent);
-                
+                var blockObj = Instantiate(block1.gameObject, new Vector3(gridPos.x, gridPos.y, 0), Quaternion.identity, boardParent);
+                Block block = blockObj.GetComponent<Block>();
+
+                if (block == null) continue;
+                // Update block's internal grid position
+                block.Setup(gridPos.x, gridPos.y, this);
+                // Place in path grid
+                pathGrid[gridPos.x, gridPos.y] = block;
+                // Update world position to grid-aligned position
+                blockTransform.position = new Vector3(gridPos.x, gridPos.y, 0);
             }
             else
             {
-                Debug.LogWarning("Block above grid!");
+                Debug.LogWarning($"Invalid position at {gridPos}");
             }
         }
-        Destroy(piece.gameObject); // Remove piece controller
+
+        // Destroy the piece controller but keep blocks
+        Destroy(pieceController.gameObject);
     }
 
-    private Vector2Int GetGridPosition(Vector3 worldPosition)
+    public Vector2Int GetGridPosition(Vector3 worldPosition)
     {
         return new Vector2Int(
             Mathf.RoundToInt(worldPosition.x),
             Mathf.RoundToInt(worldPosition.y)
         );
     }
-}
+    private bool IsPositionValid(Vector2Int gridPos)
+    {
+        return gridPos.x >= 0 &&
+            gridPos.x < boardWidth &&
+            gridPos.y >= 0 &&
+            gridPos.y < boardHeight &&
+            pathGrid[gridPos.x, gridPos.y] == null;
+    }
+    IEnumerator CheckMatch(Vector2Int position)
+    {
+        // Check for matches in the path grid
+        // This is a placeholder for match checking logic
+        for (int x = 0; x < boardWidth; x++)
+        {
+            for (int y = 0; y < boardHeight; y++)
+            {
+                if (pathGrid[x, y] != null)
+                {
+                    // Check if this block matches the criteria
+                    // For example, check color or type
+                    // If a match is found, handle it accordingly
+
+                    
+                }
+            }
+        }
+
+        yield return null;
+    }
+}   

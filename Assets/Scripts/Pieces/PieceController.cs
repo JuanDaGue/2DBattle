@@ -6,6 +6,7 @@ public class PieceController : MonoBehaviour
     private float zCoord;
     private WorldBoard worldBoard;
     private bool isDragging;
+    private Vector3 originalPosition;
 
     public void Initialize(WorldBoard board)
     {
@@ -14,6 +15,7 @@ public class PieceController : MonoBehaviour
 
     public void StartDrag()
     {
+        originalPosition = transform.position;
         zCoord = Camera.main.WorldToScreenPoint(transform.position).z;
         dragOffset = transform.position - GetMouseWorldPos();
         isDragging = true;
@@ -34,13 +36,13 @@ public class PieceController : MonoBehaviour
         
         if (worldBoard.IsValidPosition(transform))
         {
-            Debug.Log("Valid position! Placing piece.");
-            worldBoard.PlacePiece(transform);
+            worldBoard.PlacePiece(this);
         }
         else
         {
-            // Optional: Snap back to start position
-            Debug.Log("Invalid position!");
+            // Snap back to original position
+            transform.position = originalPosition;
+            Debug.Log("Invalid position! Snapping back.");
         }
     }
 
