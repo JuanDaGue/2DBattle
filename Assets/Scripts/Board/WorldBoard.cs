@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -59,7 +60,7 @@ public class WorldBoard : MonoBehaviour
     public bool IsWalkable(Vector2Int position)
     {
         if (position.x < 0 || position.x >= boardWidth || position.y < 0 || position.y >= boardHeight) return false;
-        Debug.Log("Is walkable? " + pathGrid[position.x, position.y]);
+        //Debug.Log("Is walkable? " + pathGrid[position.x, position.y]);
         return pathGrid[position.x, position.y] != null;
     }
     public void PlacePiece(PieceController pieceController)
@@ -69,7 +70,7 @@ public class WorldBoard : MonoBehaviour
         {
             Block block1 = blockTransform.GetComponent<Block>();
             Vector2Int gridPos = GetGridPosition(blockTransform.position);
-            Debug.Log("Placing block at " + gridPos);
+            //Debug.Log("Placing block at " + gridPos);
 
             if (IsPositionValid(gridPos))
             {
@@ -92,6 +93,7 @@ public class WorldBoard : MonoBehaviour
 
         // Destroy the piece controller but keep blocks
         Destroy(pieceController.gameObject);
+        StartCoroutine(CheckMatch());
     }
 
     public Vector2Int GetGridPosition(Vector3 worldPosition)
@@ -109,25 +111,68 @@ public class WorldBoard : MonoBehaviour
             gridPos.y < boardHeight &&
             pathGrid[gridPos.x, gridPos.y] == null;
     }
-    IEnumerator CheckMatch(Vector2Int position)
+    private IEnumerator CheckMatch()
     {
         // Check for matches in the path grid
         // This is a placeholder for match checking logic
+        yield return null;
+        List<Block> blockToRemove = new List<Block>();
+        List<Vector2Int> alldirectors = new List<Vector2Int>() { Vector2Int.right, Vector2Int.up, Vector2Int.left, Vector2Int.down };
+
         for (int x = 0; x < boardWidth; x++)
         {
             for (int y = 0; y < boardHeight; y++)
             {
                 if (pathGrid[x, y] != null)
                 {
-                    // Check if this block matches the criteria
-                    // For example, check color or type
-                    // If a match is found, handle it accordingly
-
-                    
+                    //GetMatch(x, y);
+                    Debug.Log($"Checking match at {x}, {y}");
+                    foreach (Vector2Int direction in alldirectors)
+                    {
+                        List<Block> match = GetMatchByDirection(x, y, direction);
+                        if (match != null)
+                        {
+                            blockToRemove.AddRange(match);
+                        }
+                    }
                 }
             }
         }
-
+        foreach (Block block in blockToRemove)
+        { 
+            RemoveBlock(block);
+        }
         yield return null;
     }
+
+    public List<Block> GetMatchByDirection(int posx, int posy, Vector2Int direction, int matchLength = 4)
+    {
+        Vector2Int position = new Vector2Int(posx, posy);
+        List<Block> matchBlocks = new List<Block>();
+        if (pathGrid[position.x, position.y] == null) return null;
+
+        // Get all blocks in the match direction
+        int x = position.x;
+        int y = position.y;
+
+        while (x >= 0 && x < boardWidth && y >= 0 && y < boardHeight && pathGrid[x, y] != null)
+        {
+            matchBlocks.Add(pathGrid[x, y]);
+            x += direction.x;
+            y += direction.y;
+        }
+        //Debug.Log($"Match length: {matchBlocks.Count} at {posx}, {posy} in direction {direction}");
+        if (matchBlocks.Count > matchLength)
+        {
+            return matchBlocks;
+        }
+        return null;
+    }
+
+    private void RemoveBlock(Block block)
+    {
+        pathGrid[block.x, block.y] = null;
+        Destroy(block.gameObject);
+    }
+
 }   

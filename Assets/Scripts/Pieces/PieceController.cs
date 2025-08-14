@@ -42,7 +42,7 @@ public class PieceController : MonoBehaviour
         {
             // Snap back to original position
             transform.position = originalPosition;
-            Debug.Log("Invalid position! Snapping back.");
+            //Debug.Log("Invalid position! Snapping back.");
         }
     }
 

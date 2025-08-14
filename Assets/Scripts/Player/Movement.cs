@@ -16,7 +16,7 @@ public class Movement : MonoBehaviour
 
     private void HandleInput()
     {
-        Debug.Log("Handling input for movement"+ isMoving);
+        //Debug.Log("Handling input for movement"+ isMoving);
         Vector2Int dir = Vector2Int.zero;
         if (Input.GetKeyDown(KeyCode.W)) dir = Vector2Int.up;
         else if (Input.GetKeyDown(KeyCode.S)) dir = Vector2Int.down;
