@@ -51,11 +51,11 @@ public class GameManager : MonoBehaviour
         SelectPlayer();
 
         StartCoroutine(SpawnTetromino());
-        SetTetromino();
-        RollDice();
-        PowerUP();
-        MovemethePlayer();
-        AddTRmpas()
+        // SetTetromino();
+        // RollDice();
+        // PowerUP();
+        // MovemethePlayer();
+        // AddTRmpas()
         
 
     }
