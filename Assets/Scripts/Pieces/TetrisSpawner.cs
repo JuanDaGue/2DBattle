@@ -2,54 +2,32 @@ using UnityEngine;
 
 public class TetrisSpawner : MonoBehaviour
 {
-    public PieceBase pieceData; // Renamed for clarity
-    public Transform pieceSpawnPoint;
-    public WorldBoard worldBoard; // Reference via Inspector
-    public PiecesType pieceType; // Type of the piece to spawn
-    public GameObject blockPrefab;
+    private WorldBoard board;
+    private GameObject blockPrefab;
+    private Transform spawnPoint;
 
-    void Start()
+    public void Initialize(WorldBoard board, GameObject blockPrefab, Transform spawnPoint)
     {
-        pieceType = PieceShapes.GetRandomPieceType();
-        // If pieceData is not assigned, use the type to get the shape
-        SpawnPieceByType();
-
-
-        // if (pieceData != null && pieceSpawnPoint != null)
-        // {
-        //     SpawnPiece();
-        // }
-    }
-    public void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            pieceType = PieceShapes.GetRandomPieceType();
-            SpawnPieceByType();
-        }
+        this.board = board;
+        this.blockPrefab = blockPrefab;
+        this.spawnPoint = spawnPoint;
     }
 
-
-    private void SpawnPieceByType()
+    public void SpawnPieceByType(PiecesType? overrideType = null)
     {
-        GameObject pieceObject = new GameObject("Piece_" + pieceType);
-        pieceObject.transform.position = pieceSpawnPoint.position;
-        PieceController pieceController = pieceObject.AddComponent<PieceController>();
-        pieceController.Initialize(worldBoard);
+        Debug.Log("Spawning piece at " + spawnPoint.position);
+        PiecesType type = overrideType ?? PieceShapes.GetRandomPieceType();
+        GameObject pieceGO = new GameObject("Piece_" + type);
+        pieceGO.transform.position = spawnPoint.position;
 
-        foreach (Vector2 pos in PieceShapes.GetShape(pieceType))
+        var controller = pieceGO.AddComponent<PieceController>();
+        controller.Initialize(board);
+
+        foreach (Vector2 cell in PieceShapes.GetShape(type))
         {
-            Vector3 spawnPos = new Vector3(pos.x, pos.y, 0f);
-            GameObject block = Instantiate(blockPrefab,
-                                           pieceObject.transform.position + spawnPos,
-                                           Quaternion.identity,
-                                           pieceObject.transform);
-
-            Block blockScript = block.GetComponent<Block>();
-            if (blockScript != null)
-            {
-                blockScript.Initialize(worldBoard);
-            }
+            Vector3 pos = pieceGO.transform.position + (Vector3)cell;
+            GameObject block = Instantiate(blockPrefab, pos, Quaternion.identity, pieceGO.transform);
+            block.GetComponent<Block>()?.Initialize(board);
         }
     }
 }
