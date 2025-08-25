@@ -15,5 +15,6 @@ MonoBehaviour:
   playerName: Player
   playerID: 1
   score: 0
+  canMove: 0
   mana: 3
   maxMana: 5

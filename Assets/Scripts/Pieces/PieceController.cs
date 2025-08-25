@@ -8,6 +8,7 @@ public class PieceController : MonoBehaviour
     private bool isDragging;
     private Vector3 originalPosition;
 
+
     public void Initialize(WorldBoard board)
     {
         worldBoard = board;
@@ -33,10 +34,11 @@ public class PieceController : MonoBehaviour
     {
         if (!isDragging) return;
         isDragging = false;
-        
+
         if (worldBoard.IsValidPosition(transform))
         {
             worldBoard.PlacePiece(this);
+            worldBoard.blockSeted = true;
         }
         else
         {

@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using Unity.VisualScripting;
 
 public class Movement : MonoBehaviour
 {
@@ -8,39 +9,56 @@ public class Movement : MonoBehaviour
 
     [SerializeField] private bool isMoving = false;
     private Player playerData;
-
+    private DiceRoller diceRoller;
+    private  int movePoints = 0;
     void Update()
     {
         if (isMoving) return;
+        if (playerData == null) return;
+
+        if (!playerData.canMove) return;    
+        
         HandleInput();
     }
-    public void Initialize(Player data, WorldBoard board)
+    public void Initialize(Player data, WorldBoard board, DiceRoller dice)
     {
         playerData = data;
         worldBoard = board;
+        diceRoller = dice;
         // Optionally use playerData to set initial state
-        Debug.Log($"Initialized movement for {playerData.PlayerName}");
+        // Debug.Log($"Initialized movement for {playerData.PlayerName}");
+        // Debug.Log($"Player can move: {playerData.canMove}");
     }
 
 
     private void HandleInput()
     {
         //Debug.Log("Handling input for movement"+ isMoving);
-        Vector2Int dir = Vector2Int.zero;
-        if (Input.GetKeyDown(KeyCode.W)) dir = Vector2Int.up;
-        else if (Input.GetKeyDown(KeyCode.S)) dir = Vector2Int.down;
-        else if (Input.GetKeyDown(KeyCode.A)) dir = Vector2Int.left;
-        else if (Input.GetKeyDown(KeyCode.D)) dir = Vector2Int.right;
-
-        if (dir != Vector2Int.zero)
+        movePoints = diceRoller.GetResult();
+        Debug.Log("Move Points: " + movePoints);
+        if (movePoints > 0)
         {
-            Vector2Int currentGrid = worldBoard.GetGridPosition(transform.position);
-            Vector2Int targetGrid = currentGrid + dir;
+            ;
+            Vector2Int dir = Vector2Int.zero;
+            if (Input.GetKeyDown(KeyCode.W)) dir = Vector2Int.up;
+            else if (Input.GetKeyDown(KeyCode.S)) dir = Vector2Int.down;
+            else if (Input.GetKeyDown(KeyCode.A)) dir = Vector2Int.left;
+            else if (Input.GetKeyDown(KeyCode.D)) dir = Vector2Int.right;
 
-            if (worldBoard.IsWalkable(targetGrid))
-                StartCoroutine(MoveToCell(targetGrid));
-            else
-                Debug.Log("Blocked at " + targetGrid);
+            if (dir != Vector2Int.zero)
+            {
+                Vector2Int currentGrid = worldBoard.GetGridPosition(transform.position);
+                Vector2Int targetGrid = currentGrid + dir;
+                Debug.Log("Dir" + dir);
+                if (worldBoard.IsWalkable(targetGrid))
+                    StartCoroutine(MoveToCell(targetGrid));
+                else
+                {
+                    //Debug.Log("Blocked at " + targetGrid);
+                    playerData.canMove = false; // Disable further movement if blocked
+                }
+            }
+        
         }
     }
 
@@ -62,6 +80,9 @@ public class Movement : MonoBehaviour
 
         transform.position = endPos;
         isMoving = false;
+        movePoints--;
+        Debug.Log("Moved to " + targetGrid + ", remaining move points: " + movePoints);
+        //playerData.canMove = false; // Disable further movement until re-enabled
     }
     
     public void AddScore(int points)

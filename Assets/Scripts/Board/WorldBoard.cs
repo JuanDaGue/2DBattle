@@ -12,6 +12,7 @@ public class WorldBoard : MonoBehaviour
     [Header("References")]
     public GameObject boardTilePrefab;
     public Transform boardParent;
+    public bool blockSeted = false;
     // public Movement player1Movement;
     // public Movement player2Movement;
 
@@ -126,7 +127,7 @@ public class WorldBoard : MonoBehaviour
                 if (pathGrid[x, y] != null)
                 {
                     //GetMatch(x, y);
-                    Debug.Log($"Checking match at {x}, {y}");
+                    //Debug.Log($"Checking match at {x}, {y}");
                     foreach (Vector2Int direction in alldirectors)
                     {
                         List<Block> match = GetMatchByDirection(x, y, direction);

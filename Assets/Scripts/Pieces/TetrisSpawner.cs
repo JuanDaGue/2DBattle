@@ -15,7 +15,7 @@ public class TetrisSpawner : MonoBehaviour
 
     public void SpawnPieceByType(PiecesType? overrideType = null)
     {
-        Debug.Log("Spawning piece at " + spawnPoint.position);
+        //Debug.Log("Spawning piece at " + spawnPoint.position);
         PiecesType type = overrideType ?? PieceShapes.GetRandomPieceType();
         GameObject pieceGO = new GameObject("Piece_" + type);
         pieceGO.transform.position = spawnPoint.position;

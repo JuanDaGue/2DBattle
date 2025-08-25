@@ -26,32 +26,34 @@ public class GameManager : MonoBehaviour
 
     [Header("Player Data")]
     [SerializeField] private List<Player> playerDataList = new List<Player>();
-
+    private Player currentPlayer;
     private Movement player1Movement;
     private Movement player2Movement;
     private DiceRoller diceRoller;
+    private int currentDiceRoll;
 
 
     // private TurnManager turnManager;
     // private GameState gameState;
     private bool isGameOver = false;
     private int turn = 1;
-
-
-
-
     public List<Color> player1Colors = new List<Color>(2);
 
     private void Awake()
     {
         // // Initialize the board and spawner
-        // board = FindFirstObjectByType<WorldBoard>();
-        // if (board == null)
-        // {
-        //     Debug.LogError("WorldBoard not found in the scene.");
-        //     return;
-        // }
-
+        board = FindFirstObjectByType<WorldBoard>();
+        if (board == null)
+        {
+            Debug.LogError("WorldBoard not found in the scene.");
+            return;
+        }
+        diceRoller = FindFirstObjectByType<DiceRoller>();
+        if (diceRoller == null)
+        {
+            Debug.LogError("diceRoller not found in the scene.");
+            return;
+        }
         // spawner = FindFirstObjectByType<TetrisSpawner>();
         // if (spawner == null)
         // {
@@ -76,7 +78,7 @@ public class GameManager : MonoBehaviour
         Transform spawnPoint = player1SpawnPoint[i];
 
         GameObject playerGO = Instantiate(playerPrefab, spawnPoint.position, Quaternion.identity);
-        playerGO.transform.localScale = Vector3.one;
+        playerGO.transform.localScale = Vector3.one*0.5f;
         playerGO.transform.rotation = Quaternion.identity;
         playerGO.transform.SetParent(spawnPoint);
         playerGO.name = $"Player_{playerData.PlayerID}";
@@ -89,48 +91,72 @@ public class GameManager : MonoBehaviour
         Movement movement = playerGO.GetComponent<Movement>();
         if (movement != null)
         {
-            movement.Initialize(playerData,board); // You’ll need to implement this method
+            movement.Initialize(playerData,board, diceRoller); // You’ll need to implement this method
         }
 
-        Debug.Log($"Spawned {playerData.PlayerName} with ID {playerData.PlayerID}");
+        //Debug.Log($"Spawned {playerData.PlayerName} with ID {playerData.PlayerID}");
     }
 }
 
 
     // Update is called once per frame
-    void Update()
-    {
-
-    }
     public void StartGame()
     {
         // Start game
         isGameOver = false;
-        Debug.Log("Game started!");
-        Debug.Log("Player 1 score: " + turn);
+        // Debug.Log("Game started!");
+        // Debug.Log("Player 1 score: " + turn);
         player1Score = 0;
         player2Score = 0;
-        StartTurn();
+        StartCoroutine(GameLoop());
     }
 
-    public void SelectPlayer()
+    private IEnumerator GameLoop()
     {
+        // Example game loop logic
+        // Wait for block to be set
+        yield return StartCoroutine(StartTurn());
+        yield return StartCoroutine(WaitForBlockSet());
+        yield return StartCoroutine(RollDice());
+        // Move player based on dice roll
+        if (currentPlayer != null && currentDiceRoll > 0)
+        {
+            // currentPlayer.Move(currentDiceRoll, board);
+            currentPlayer.canMove = true;
+            yield return new WaitUntil(() => !currentPlayer.canMove);
+            currentPlayer.canMove = false;
+            //Debug.Log($"Moved {currentPlayer.PlayerName} by {currentDiceRoll} steps.");
+            //currentDiceRoll = 0; // Reset dice roll after movement
+        }
+        // End turn and start next turn
+        EndTurn();
+        NextTurn();
+        StartTurn();
 
+        // Prevent multiple coroutines from running simultaneously
+        yield break;
     }
-    public void StartTurn()
+
+    private IEnumerator StartTurn()
     {
         // Start turn
         turn = 1;
-        //SelectPlayer();
 
         SpawnTetromino();
-        // SetTetromino();
-        // RollDice();
+        SelectPlayer(turn);
+        //SetTetromino();
+        yield return null;
+        
         // PowerUP();
         // MovemethePlayer();
         // AddTRmpas()
-        
+    }
 
+    public void SelectPlayer(int turn = 1)
+    {
+        int index = turn % 2;
+        currentPlayer = playerDataList.Find(p => p.PlayerID == index);
+        //Debug.Log($"It's {currentPlayer.PlayerName}'s turn (ID: {currentPlayer.PlayerID})");
     }
     public void NextTurn()
     {
@@ -138,10 +164,15 @@ public class GameManager : MonoBehaviour
         turn++;
 
     }
-    public void RollDice()
+    private IEnumerator RollDice()
     {
         // Roll dice
-        //StartCoroutine(diceRoller.RollDice());
+        diceRoller.RollDice();
+        yield return new WaitUntil(() => diceRoller.HasResult);
+        currentDiceRoll = diceRoller.GetResult();
+        //diceRoller.ResetDice();
+        //Debug.Log("Dice rolled: " + currentDiceRoll);
+        yield return null;
     }
 
     public void EndTurn()
@@ -171,5 +202,18 @@ public void EndTurn(int playerID)
         Debug.Log("Game over!");
     }
 
+    private IEnumerator WaitForBlockSet()
+    {
+        // Wait until the block is set on the board
+        while (!board.blockSeted)
+        {
+            yield return null;
+        }
+        // Continue with next steps after block is set
+        //Debug.Log("Block has been set!");
+        // You can add additional logic here if needed
+        yield return null;
+        board.blockSeted = false;
 
+    }
 }

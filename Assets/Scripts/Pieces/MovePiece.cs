@@ -11,7 +11,7 @@ public class MovePiece : MonoBehaviour
     {
         parentTransform = transform.parent;
         worldBoard = FindFirstObjectByType<WorldBoard>();
-        Debug.Log("Parent Transform: " + parentTransform);
+        //Debug.Log("Parent Transform: " + parentTransform);
     }
 
     // Update is called once per frame
@@ -26,14 +26,14 @@ public class MovePiece : MonoBehaviour
 
         // Calculamos el offset entre la posición del objeto y la del mouse
         offset = transform.position - GetMouseWorldPos();
-        Debug.Log("Mouse Down: " + transform.position + " Offset: " + offset);
+        //Debug.Log("Mouse Down: " + transform.position + " Offset: " + offset);
     }
 
     void OnMouseDrag()
     {
         // Mientras mantenemos presionado, actualizamos la posición
         parentTransform.position = GetMouseWorldPos() + offset;
-        Debug.Log("Mouse Drag: " + transform.position);
+        //Debug.Log("Mouse Drag: " + transform.position);
     }
 
     // Convierte la posición del mouse en pantalla a posición en mundo
@@ -41,12 +41,12 @@ public class MovePiece : MonoBehaviour
     {
         Vector3 mousePoint = Input.mousePosition;
         mousePoint.z = zCoord;
-        Debug.Log("Mouse World Pos: " + mousePoint);
+        //Debug.Log("Mouse World Pos: " + mousePoint);
         return Camera.main.ScreenToWorldPoint(mousePoint);
     }
     void OnMouseUp()
     {
-        Debug.Log("Mouse Up: " + transform.position);
+        //Debug.Log("Mouse Up: " + transform.position);
         //TetrisSpawner spawner = gameObject.GetComponent<TetrisSpawner>();
         Block block = gameObject.GetComponent<Block>();
         //worldBoard.SetBoard(parentTransform.gameObject);
