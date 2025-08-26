@@ -123,6 +123,7 @@ public class GameManager : MonoBehaviour
         {
             // currentPlayer.Move(currentDiceRoll, board);
             currentPlayer.canMove = true;
+            currentPlayer.SetMovePoints(currentDiceRoll);
             yield return new WaitUntil(() => !currentPlayer.canMove);
             currentPlayer.canMove = false;
             //Debug.Log($"Moved {currentPlayer.PlayerName} by {currentDiceRoll} steps.");

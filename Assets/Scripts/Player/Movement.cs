@@ -25,17 +25,19 @@ public class Movement : MonoBehaviour
         playerData = data;
         worldBoard = board;
         diceRoller = dice;
+        movePoints = playerData.movePoints;
         // Optionally use playerData to set initial state
         // Debug.Log($"Initialized movement for {playerData.PlayerName}");
         // Debug.Log($"Player can move: {playerData.canMove}");
+        
     }
 
 
     private void HandleInput()
     {
         //Debug.Log("Handling input for movement"+ isMoving);
-        movePoints = diceRoller.GetResult();
-        Debug.Log("Move Points: " + movePoints);
+        
+        Debug.Log("Move Points: " +playerData.movePoints);
         if (movePoints > 0)
         {
             ;
@@ -80,7 +82,7 @@ public class Movement : MonoBehaviour
 
         transform.position = endPos;
         isMoving = false;
-        movePoints--;
+        playerData.movePoints--;
         Debug.Log("Moved to " + targetGrid + ", remaining move points: " + movePoints);
         //playerData.canMove = false; // Disable further movement until re-enabled
     }
