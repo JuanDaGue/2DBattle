@@ -53,6 +53,12 @@ public class Player : ScriptableObject
         if (health > maxHealth)
             health = maxHealth;
     }
+    public void AddMana(int amount)
+    {
+        mana += amount;
+        if (mana > maxMana)
+            mana = maxMana;
+    }
     public void TakeMana(int amount)
     {
         mana -= amount;

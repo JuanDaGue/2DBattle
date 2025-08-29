@@ -37,8 +37,8 @@ public class Movement : MonoBehaviour
     {
         //Debug.Log("Handling input for movement"+ isMoving);
         
-        Debug.Log("Move Points: " +playerData.movePoints);
-        if (movePoints > 0)
+        //Debug.Log("Move Points: " +playerData.movePoints);
+        if (playerData.movePoints > 0)
         {
             ;
             Vector2Int dir = Vector2Int.zero;
@@ -51,16 +51,21 @@ public class Movement : MonoBehaviour
             {
                 Vector2Int currentGrid = worldBoard.GetGridPosition(transform.position);
                 Vector2Int targetGrid = currentGrid + dir;
-                Debug.Log("Dir" + dir);
+                //Debug.Log("Dir" + dir);
                 if (worldBoard.IsWalkable(targetGrid))
                     StartCoroutine(MoveToCell(targetGrid));
                 else
                 {
-                    //Debug.Log("Blocked at " + targetGrid);
+                    
                     playerData.canMove = false; // Disable further movement if blocked
                 }
             }
         
+        }
+        else
+        {
+            playerData.canMove = false; // Disable movement if no move points left
+            Debug.Log("No move points left, cannot move.");
         }
     }
 
@@ -83,7 +88,8 @@ public class Movement : MonoBehaviour
         transform.position = endPos;
         isMoving = false;
         playerData.movePoints--;
-        Debug.Log("Moved to " + targetGrid + ", remaining move points: " + movePoints);
+        diceRoller.UpdateUi(playerData.movePoints);
+        //Debug.Log("Moved to " + targetGrid + ", remaining move points: " + movePoints);
         //playerData.canMove = false; // Disable further movement until re-enabled
     }
     

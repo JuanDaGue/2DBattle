@@ -14,7 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerName: Player
   playerID: 1
-  score: 0
+  score: 23
+  health: 100
+  maxHealth: 100
   canMove: 0
-  mana: 3
+  movePoints: 0
+  x: 0
+  y: 0
+  mana: 5
   maxMana: 5

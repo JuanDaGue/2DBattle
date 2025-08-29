@@ -39,4 +39,8 @@ public class DiceRoller : MonoBehaviour
     {
         result = 0;
     }
+    public void UpdateUi( int result)
+    {
+        resultText.text = result.ToString();
+    }
 }

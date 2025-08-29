@@ -6,11 +6,11 @@ public class TetrisSpawner : MonoBehaviour
     private GameObject blockPrefab;
     private Transform spawnPoint;
 
-    public void Initialize(WorldBoard board, GameObject blockPrefab, Transform spawnPoint)
+    public void Initialize(WorldBoard board, GameObject blockPrefab)
     {
         this.board = board;
         this.blockPrefab = blockPrefab;
-        this.spawnPoint = spawnPoint;
+       
     }
 
     public void SpawnPieceByType(PiecesType? overrideType = null)
@@ -30,8 +30,12 @@ public class TetrisSpawner : MonoBehaviour
             block.GetComponent<Block>()?.Initialize(board);
         }
     }
-}
+    public void SetSpawnPoint(Transform spawnPoint)
+    {
+        this.spawnPoint = spawnPoint;
+    }
 
+}
     // private void SpawnPiece()
     // {
     //     GameObject pieceObject = new GameObject(pieceData.pieceName);
