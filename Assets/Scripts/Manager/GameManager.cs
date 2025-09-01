@@ -35,11 +35,16 @@ public class GameManager : MonoBehaviour
     private int turn = 1;
     public List<Color> playerColors = new List<Color>();
     public TextMeshProUGUI gameStateText;
+    public UiManager uiManager;
+
+    [Header("References")]
+    private CamerasManager camerasManager;
 
     private void Awake()
     {
         board = FindFirstObjectByType<WorldBoard>();
         diceRoller = FindFirstObjectByType<DiceRoller>();
+        camerasManager = FindFirstObjectByType<CamerasManager>();
 
         // Initialize spawners for each player
 
@@ -52,9 +57,10 @@ public class GameManager : MonoBehaviour
 
         playerVectorSpawnPoints.Add(new Vector2Int(player1X, player1Y));
         playerVectorSpawnPoints.Add(new Vector2Int(player2X, player2Y));
-        
+        uiManager.Initialize(playerDataList[0]);
+       }
 
-    }
+    
 
     void Start()
     {
@@ -63,8 +69,10 @@ public class GameManager : MonoBehaviour
         StartGame();
     }
 
-    private void SpawnPlayers()
-    {
+private void SpawnPlayers()
+{
+    camerasManager.cameraTargets.Clear(); // Clear any existing targets
+
         for (int i = 0; i < playerDataList.Count && i < playerSpawnPoints.Count; i++)
         {
             Player playerData = playerDataList[i];
@@ -82,11 +90,14 @@ public class GameManager : MonoBehaviour
             {
                 movement.Initialize(playerData, board, diceRoller);
             }
-            //playerGO.GetComponent<Player>().SetPosition((int)spawnPoint.position.x, (int)spawnPoint.position.y);
+
+            // Set player position and add to camera targets
             playerGO.transform.position = new Vector3(playerVectorSpawnPoints[i].x, playerVectorSpawnPoints[i].y, 0);
-           
-        }
+            camerasManager.cameraTargets.Add(playerGO.transform);
+            
+                
     }
+}
 
     public void StartGame()
     {
@@ -134,6 +145,8 @@ public class GameManager : MonoBehaviour
         int playerIndex = (turn - 1) % playerDataList.Count;
         currentPlayer = playerDataList[playerIndex];
         Debug.Log($"It's {currentPlayer.PlayerName}'s turn (ID: {currentPlayer.PlayerID})");
+        camerasManager.SwitchCameraToPlayer(currentPlayer.PlayerID);
+        uiManager.Initialize(currentPlayer);
     }
 
     private IEnumerator RollDice()

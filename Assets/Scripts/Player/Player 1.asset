@@ -14,12 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerName: Player
   playerID: 1
-  score: 23
-  health: 100
-  maxHealth: 100
+  score: 35
+  maxLives: 5
+  lives: 3
+  maxMana: 5
+  mana: 5
   canMove: 0
-  movePoints: 0
+  movePoints: 3
   x: 0
   y: 0
-  mana: 5
-  maxMana: 5
+  rangedAttackRange: 3
