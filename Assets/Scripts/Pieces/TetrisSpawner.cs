@@ -5,7 +5,7 @@ public class TetrisSpawner : MonoBehaviour
     private WorldBoard board;
     private GameObject blockPrefab;
     private Transform spawnPoint;
-
+    public PieceUIFactory pieceUIFactory;
     public void Initialize(WorldBoard board, GameObject blockPrefab)
     {
         this.board = board;
@@ -19,7 +19,7 @@ public class TetrisSpawner : MonoBehaviour
         PiecesType type = overrideType ?? PieceShapes.GetRandomPieceType();
         GameObject pieceGO = new GameObject("Piece_" + type);
         pieceGO.transform.position = spawnPoint.position;
-
+        pieceUIFactory.CreatePiece(type, color: null, instanceName: pieceGO.name);
         var controller = pieceGO.AddComponent<PieceController>();
         controller.Initialize(board);
 

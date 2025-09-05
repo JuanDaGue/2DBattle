@@ -29,6 +29,7 @@ public class CamerasManager : MonoBehaviour
     
     private Transform currentTarget;
     private CameraMode currentCameraMode = CameraMode.Middle;
+    private float aux=1f;
     
     // Enum to track current camera mode
     private enum CameraMode
@@ -107,6 +108,13 @@ public class CamerasManager : MonoBehaviour
             currentTarget = cameraTargets[playerId - 1];
             StartCoroutine(MoveCameraToTarget(currentTarget));
         }
+        if(playerId==1){
+            aux=1f;
+        }
+        else{
+            aux=-1f;
+        }
+        //Debug.Log("aux"+ aux);
     }
 
     public void Update()
@@ -154,12 +162,15 @@ public class CamerasManager : MonoBehaviour
         {
             case CameraMode.Far:
                 mainCamera.orthographicSize = farCameraSize;
+                offsetY=0f;
                 break;
             case CameraMode.Middle:
                 mainCamera.orthographicSize = middleCameraSize;
+                offsetY=7.5f*aux;
                 break;
             case CameraMode.Near:
                 mainCamera.orthographicSize = nearCameraSize;
+                offsetY=3.5f*aux;
                 break;
         }
     }

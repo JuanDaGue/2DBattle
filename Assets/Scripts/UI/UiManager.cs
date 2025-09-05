@@ -11,10 +11,10 @@ public class UiManager : MonoBehaviour
     TextMeshProUGUI gameStateText;
     private GameManager gameManager;
     private Player player;
-     public List<Image> LifeImages = new List<Image>();
-     public Sprite lifeSprite;
+    public List<Image> LifeImages = new List<Image>();
+    public Sprite lifeSprite;
 
-     public List<Image> ManaImages = new List<Image>();
+    public List<Image> ManaImages = new List<Image>();
 
 
     // Add this method to switch camera focus
@@ -35,7 +35,7 @@ public class UiManager : MonoBehaviour
 
     private void UpdateLifeImages()
     {
-        Debug.Log("Updating Life Images"+ player.Lives);
+        //Debug.Log("Updating Life Images"+ player.Lives);
 
         for (int i = 0; i < LifeImages.Count; i++)
         {
@@ -44,6 +44,7 @@ public class UiManager : MonoBehaviour
             if (i < player.Lives)
             {
                 LifeImages[i].sprite = lifeSprite;
+                //LifeImages[i].sprite.fill= player.color;
                 LifeImages[i].gameObject.SetActive(true);
             }
             else
@@ -66,6 +67,6 @@ public class UiManager : MonoBehaviour
         playerScoreText = FindFirstObjectByType<TextMeshProUGUI>();
         gameStateText = FindFirstObjectByType<TextMeshProUGUI>();
         UpdateLifeImages();
-         UpdateScoreText();           
+        UpdateScoreText();           
     }
 }
