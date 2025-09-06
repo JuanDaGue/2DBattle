@@ -2,76 +2,82 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
     [Header("Prefabs")]
-    public GameObject playerPrefab;
-    public GameObject blockPrefab;
+    [SerializeField] private GameObject playerPrefab;
+    [SerializeField] private GameObject blockPrefab;
 
     [Header("Spawn Points")]
-    public List<Transform> playerSpawnPoints = new List<Transform>();
-    public List<Vector2Int> playerVectorSpawnPoints = new List<Vector2Int>(2);
-    public List<Transform> tetrominoSpawnPoints = new List<Transform>();
+    [SerializeField] private List<Transform> playerSpawnPoints = new List<Transform>();
+    [SerializeField] private List<Vector2Int> playerVectorSpawnPoints = new List<Vector2Int>(2);
+    [SerializeField] private List<Transform> tetrominoSpawnPoints = new List<Transform>();
 
     [Header("Game Settings")]
-    [Range(1, 10)]
-    public int player1Score = 0;
-    [Range(1, 10)]
-    public int player2Score = 0;
+    [SerializeField] [Range(1, 10)] private int player1Score = 0;
+    [SerializeField] [Range(1, 10)] private int player2Score = 0;
 
     [Header("References")]
     [SerializeField] private WorldBoard board;
     [SerializeField] private TetrisSpawner pieceSpawners;
+    [SerializeField] private UiManager uiManager;
+    [SerializeField] private TextMeshProUGUI gameStateText;
 
     [Header("Player Data")]
     [SerializeField] private List<Player> playerDataList = new List<Player>();
+    [SerializeField] private List<Color> playerColors = new List<Color>();
+    
     private Player currentPlayer;
     private DiceRoller diceRoller;
+    private CamerasManager camerasManager;
     private int currentDiceRoll;
-
     private bool isGameOver = false;
     private int turn = 1;
-    public List<Color> playerColors = new List<Color>();
-    public TextMeshProUGUI gameStateText;
-    public UiManager uiManager;
-
-    [Header("References")]
-    private CamerasManager camerasManager;
 
     private void Awake()
     {
-        board = FindFirstObjectByType<WorldBoard>();
-        diceRoller = FindFirstObjectByType<DiceRoller>();
-        camerasManager = FindFirstObjectByType<CamerasManager>();
+        // Find required components
+        board = FindObjectOfType<WorldBoard>();
+        diceRoller = FindObjectOfType<DiceRoller>();
+        camerasManager = FindObjectOfType<CamerasManager>();
+        
+        if (board == null) Debug.LogError("WorldBoard not found!");
+        if (diceRoller == null) Debug.LogError("DiceRoller not found!");
+        if (camerasManager == null) Debug.LogError("CamerasManager not found!");
+        if (pieceSpawners == null) Debug.LogError("TetrisSpawner not found!");
 
-        // Initialize spawners for each player
-
+        // Initialize spawners
         pieceSpawners.Initialize(board, blockPrefab);
+        
         // Set player spawn points in grid coordinates
-        int player1X = (int)(board.boardWidth * 0.5);
+        int player1X = Mathf.RoundToInt(board.boardWidth * 0.5f);
         int player1Y = 0;
-        int player2X = (int)(board.boardWidth * 0.5);
-        int player2Y = (int)(board.boardHeight) - 1;
+        int player2X = Mathf.RoundToInt(board.boardWidth * 0.5f);
+        int player2Y = board.boardHeight - 1;
 
         playerVectorSpawnPoints.Add(new Vector2Int(player1X, player1Y));
         playerVectorSpawnPoints.Add(new Vector2Int(player2X, player2Y));
-        uiManager.Initialize(playerDataList[0]);
-       }
+        
+        // Initialize UI for first player
+        if (playerDataList.Count > 0 && uiManager != null)
+        {
+            uiManager.Initialize(playerDataList[0]);
+        }
+    }
 
-    
-
-    void Start()
+    private void Start()
     {
-
         SpawnPlayers();
         StartGame();
     }
 
-private void SpawnPlayers()
-{
-    camerasManager.cameraTargets.Clear(); // Clear any existing targets
+    private void SpawnPlayers()
+    {
+        if (camerasManager != null)
+        {
+            camerasManager.cameraTargets.Clear(); // Clear any existing targets
+        }
 
         for (int i = 0; i < playerDataList.Count && i < playerSpawnPoints.Count; i++)
         {
@@ -79,12 +85,20 @@ private void SpawnPlayers()
             Transform spawnPoint = playerSpawnPoints[i];
 
             GameObject playerGO = Instantiate(playerPrefab, spawnPoint.position, Quaternion.identity);
+            playerGO.name = $"Player_{playerData.PlayerName}_{playerData.PlayerID}";
             playerGO.transform.localScale = Vector3.one * 0.5f;
-            playerGO.name = $"Player_{playerData.PlayerID}";
 
+            // Set player color if available
             if (i < playerColors.Count)
-                playerGO.GetComponent<Renderer>().material.color = playerColors[i];
+            {
+                Renderer renderer = playerGO.GetComponent<Renderer>();
+                if (renderer != null)
+                {
+                    renderer.material.color = playerColors[i];
+                }
+            }
 
+            // Initialize movement component
             Movement movement = playerGO.GetComponent<Movement>();
             if (movement != null)
             {
@@ -92,12 +106,18 @@ private void SpawnPlayers()
             }
 
             // Set player position and add to camera targets
-            playerGO.transform.position = new Vector3(playerVectorSpawnPoints[i].x, playerVectorSpawnPoints[i].y, 0);
-            camerasManager.cameraTargets.Add(playerGO.transform);
+            playerGO.transform.position = new Vector3(
+                playerVectorSpawnPoints[i].x, 
+                playerVectorSpawnPoints[i].y, 
+                0
+            );
             
-                
+            if (camerasManager != null)
+            {
+                camerasManager.cameraTargets.Add(playerGO.transform);
+            }
+        }
     }
-}
 
     public void StartGame()
     {
@@ -110,26 +130,32 @@ private void SpawnPlayers()
 
     private IEnumerator GameLoop()
     {
-        yield return StartCoroutine(UIGameText("Game Started"));
-        yield return StartCoroutine(StartTurn());
-        yield return StartCoroutine(UIGameText("Waiting for block set"));
-        yield return StartCoroutine(WaitForBlockSet());
-        yield return StartCoroutine(UIGameText("Rolling dice"));
-        yield return StartCoroutine(RollDice());
-        
-
-        if (currentPlayer != null && currentDiceRoll > 0)
+        while (!isGameOver)
         {
-            currentPlayer.canMove = true;
-            currentPlayer.SetMovePoints(currentDiceRoll);
-            yield return new WaitUntil(() => !currentPlayer.canMove);
+            yield return StartCoroutine(ShowGameStateText("Game Started"));
+            yield return StartCoroutine(StartTurn());
+            yield return StartCoroutine(ShowGameStateText("Waiting for block set"));
+            yield return StartCoroutine(WaitForBlockSet());
+            yield return StartCoroutine(ShowGameStateText("Rolling dice"));
+            yield return StartCoroutine(RollDice());
+            
+            if (currentPlayer != null && currentDiceRoll > 0)
+            {
+                currentPlayer.canMove = true;
+                currentPlayer.SetMovePoints(currentDiceRoll);
+                yield return new WaitUntil(() => !currentPlayer.canMove);
+            }
+            
+            yield return StartCoroutine(ShowGameStateText("Ending turn"));
+            yield return StartCoroutine(EndTurn());
+            yield return StartCoroutine(ShowGameStateText("Next Turn"));
+            
+            // Check for game over condition
+            if (turn > 20) // Example condition
+            {
+                EndGame();
+            }
         }
-        
-        yield return StartCoroutine(UIGameText("Ending turn"));
-        yield return StartCoroutine(EndTurn());
-        yield return StartCoroutine(UIGameText("Next Turn"));
-        if (!isGameOver)
-            StartCoroutine(GameLoop());
     }
 
     private IEnumerator StartTurn()
@@ -140,56 +166,88 @@ private void SpawnPlayers()
         yield return null;
     }
 
-    public void SelectPlayer(int turn)
+    private void SelectPlayer(int turn)
     {
         int playerIndex = (turn - 1) % playerDataList.Count;
-        currentPlayer = playerDataList[playerIndex];
-        Debug.Log($"It's {currentPlayer.PlayerName}'s turn (ID: {currentPlayer.PlayerID})");
-        camerasManager.SwitchCameraToPlayer(currentPlayer.PlayerID);
-        uiManager.Initialize(currentPlayer);
+        if (playerIndex < playerDataList.Count)
+        {
+            currentPlayer = playerDataList[playerIndex];
+            Debug.Log($"It's {currentPlayer.PlayerName}'s turn (ID: {currentPlayer.PlayerID})");
+            
+            if (camerasManager != null)
+            {
+                camerasManager.SwitchCameraToPlayer(currentPlayer.PlayerID);
+            }
+            
+            if (uiManager != null)
+            {
+                uiManager.Initialize(currentPlayer);
+            }
+        }
     }
 
     private IEnumerator RollDice()
     {
-        diceRoller.RollDice();
-        yield return new WaitUntil(() => diceRoller.HasResult);
-        currentDiceRoll = diceRoller.GetResult();
+        if (diceRoller != null)
+        {
+            diceRoller.RollDice();
+            yield return new WaitUntil(() => diceRoller.HasResult);
+            currentDiceRoll = diceRoller.GetResult();
+        }
         yield return null;
     }
 
     private IEnumerator EndTurn()
     {
-        currentPlayer.AddMana(1);
-        currentPlayer.AddScore(Random.Range(1, 5));
+        if (currentPlayer != null)
+        {
+            currentPlayer.AddMana(1);
+            currentPlayer.AddScore(Random.Range(1, 5));
+        }
         turn++;
         yield return null;
     }
 
     private void SpawnTetromino()
     {
-        int spawnerIndex = currentPlayer.PlayerID - 1;
-        pieceSpawners.SetSpawnPoint(tetrominoSpawnPoints[spawnerIndex]);
-        pieceSpawners.SpawnPieceByType();
+        if (pieceSpawners != null && currentPlayer != null)
+        {
+            int spawnerIndex = currentPlayer.PlayerID - 1;
+            if (spawnerIndex < tetrominoSpawnPoints.Count)
+            {
+                pieceSpawners.SetSpawnPoint(tetrominoSpawnPoints[spawnerIndex]);
+                pieceSpawners.SpawnPieceByType();
+            }
+        }
     }
+
     public void EndGame()
     {
         isGameOver = true;
         Debug.Log("Game over!");
+        StartCoroutine(ShowGameStateText("Game Over!"));
     }
 
     private IEnumerator WaitForBlockSet()
     {
-        while (!board.blockSeted)
+        if (board != null)
         {
-            yield return null;
+            while (!board.blockSeted)
+            {
+                yield return null;
+            }
+            board.blockSeted = false;
         }
-        board.blockSeted = false;
     }
-    private IEnumerator UIGameText( string gameState)
+
+    private IEnumerator ShowGameStateText(string gameState)
     {
-        gameStateText.text = gameState;
-        gameStateText.gameObject.SetActive(true);
-        yield return new WaitForSeconds(2f);
-        gameStateText.gameObject.SetActive(false);
+        if (gameStateText != null)
+        {
+            gameStateText.text = gameState;
+            gameStateText.gameObject.SetActive(true);
+            yield return new WaitForSeconds(2f);
+            gameStateText.gameObject.SetActive(false);
+        }
     }
 }

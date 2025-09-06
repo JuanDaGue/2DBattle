@@ -1,11 +1,14 @@
 using UnityEngine;
 using System.Collections;
+using TMPro;
+
 public class DiceRoller : MonoBehaviour
 {
-    public int minValue = 1;
-    public int maxValue = 6;
-    public float rollDuration = 1f;
-    public TMPro.TextMeshProUGUI resultText;
+    [Header("Dice Settings")]
+    [SerializeField] private int minValue = 1;
+    [SerializeField] private int maxValue = 6;
+    [SerializeField] private float rollDuration = 1f;
+    [SerializeField] private TMPro.TextMeshProUGUI resultText;
     
     private int result;
     private bool isRolling;
@@ -14,7 +17,10 @@ public class DiceRoller : MonoBehaviour
     
     public void RollDice()
     {
-        StartCoroutine(RollDiceCoroutine());
+        if (!isRolling)
+        {
+            StartCoroutine(RollDiceCoroutine());
+        }
     }
     
     private IEnumerator RollDiceCoroutine()
@@ -26,11 +32,12 @@ public class DiceRoller : MonoBehaviour
         while (Time.time < endTime)
         {
             result = Random.Range(minValue, maxValue + 1);
-            resultText.text = result.ToString();
+            UpdateUI(result);
             yield return null;
         }
         
         isRolling = false;
+        Debug.Log($"Dice roll result: {result}");
     }
     
     public int GetResult() => result;
@@ -38,9 +45,14 @@ public class DiceRoller : MonoBehaviour
     public void ResetDice()
     {
         result = 0;
+        UpdateUI(0);
     }
-    public void UpdateUi( int result)
+    
+    public void UpdateUI(int value)
     {
-        resultText.text = result.ToString();
+        if (resultText != null)
+        {
+            resultText.text = value.ToString();
+        }
     }
 }
