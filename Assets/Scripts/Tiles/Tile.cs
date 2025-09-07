@@ -6,10 +6,12 @@ public class Tile : MonoBehaviour
     public int x;
     public int y;
     public WorldBoard board;
-    public void Setup( int x_, int y_ , WorldBoard board_){
-        x= x_;
-        y= y_;
-        board= board_;
+    
+    public void Setup(int x_, int y_, WorldBoard board_)
+    {
+        x = x_;
+        y = y_;
+        board = board_;
     }
 
     public void OnMouseDown()

@@ -443,7 +443,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.039215688, g: 0.1254902, b: 0.24313727, a: 1}
+  m_Color: {r: 0.6, g: 0.7019608, b: 0.827451, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -915,19 +915,19 @@ MonoBehaviour:
   playerVectorSpawnPoints: []
   tetrominoSpawnPoints:
   - {fileID: 309730818}
-  - {fileID: 1294120033}
+  - {fileID: 470249585}
   player1Score: 1
   player2Score: 1
   board: {fileID: 198007618}
   pieceSpawners: {fileID: 198007620}
+  uiManager: {fileID: 1810691017}
+  gameStateText: {fileID: 290676009}
   playerDataList:
   - {fileID: 11400000, guid: d0da5907ee9fad941881eaf2717112a9, type: 2}
   - {fileID: 11400000, guid: 82f22be359a0cb1478345587d7a161e5, type: 2}
   playerColors:
   - {r: 0.9339623, g: 0.048460312, b: 0.048460312, a: 1}
   - {r: 0, g: 0, b: 0.9647059, a: 1}
-  gameStateText: {fileID: 290676009}
-  uiManager: {fileID: 1810691017}
 --- !u!4 &340771893
 Transform:
   m_ObjectHideFlags: 0
@@ -1418,7 +1418,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.60784316, g: 0.7058824, b: 0.83137256, a: 1}
+  m_Color: {r: 0.6, g: 0.7019608, b: 0.827451, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2538,7 +2538,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.043137256, g: 0.05882353, b: 0.07058824, a: 0.392}
+  m_Color: {r: 0.043137256, g: 0.05882353, b: 0.07058824, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

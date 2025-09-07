@@ -5,7 +5,7 @@ public class PieceController : MonoBehaviour
     private Vector3 dragOffset;
     private float zCoord;
     private WorldBoard worldBoard;
-    private bool isDragging;
+    [SerializeField] private bool isDragging;
     private Vector3 originalPosition;
 
 

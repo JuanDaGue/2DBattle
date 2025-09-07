@@ -20,11 +20,13 @@ public class PieceUIFactory : MonoBehaviour
     /// </summary>
     public RectTransform CreatePiece(PiecesType type, Color? color = null, string instanceName = null)
     {
-        if (piecesUI == null) {
+        if (piecesUI == null)
+        {
             Debug.LogError("PieceUIFactory: piecesUI is not assigned.");
             return null;
         }
-        if (blockPrefab == null) {
+        if (blockPrefab == null)
+        {
             Debug.LogError("PieceUIFactory: blockPrefab is not assigned.");
             return null;
         }
@@ -53,7 +55,8 @@ public class PieceUIFactory : MonoBehaviour
         pieceRect.pivot = new Vector2(0.5f, 0.5f);
         pieceRect.anchoredPosition = Vector2.zero;
         pieceRect.sizeDelta = Vector2.zero;
-
+        Button pieceButton = pieceGO.AddComponent<Button>();
+        pieceButton.onClick.AddListener(() => OnPieceClicked());
         // Instantiate blocks
         float stepX = blockSize + spacing.x;
         float stepY = blockSize + spacing.y;
@@ -105,5 +108,10 @@ public class PieceUIFactory : MonoBehaviour
             var child = piecesUI.GetChild(i);
             Destroy(child.gameObject);
         }
+    }
+    
+      private void OnPieceClicked()
+    {
+        Debug.Log("Dragging");
     }
 }

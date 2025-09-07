@@ -38,9 +38,9 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         // Find required components
-        board = FindObjectOfType<WorldBoard>();
-        diceRoller = FindObjectOfType<DiceRoller>();
-        camerasManager = FindObjectOfType<CamerasManager>();
+        board = FindFirstObjectByType<WorldBoard>();
+        diceRoller = FindFirstObjectByType<DiceRoller>();
+        camerasManager = FindFirstObjectByType<CamerasManager>();
         
         if (board == null) Debug.LogError("WorldBoard not found!");
         if (diceRoller == null) Debug.LogError("DiceRoller not found!");
@@ -217,6 +217,7 @@ public class GameManager : MonoBehaviour
             {
                 pieceSpawners.SetSpawnPoint(tetrominoSpawnPoints[spawnerIndex]);
                 pieceSpawners.SpawnPieceByType();
+                
             }
         }
     }

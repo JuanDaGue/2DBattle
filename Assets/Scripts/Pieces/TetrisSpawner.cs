@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class TetrisSpawner : MonoBehaviour
@@ -10,7 +11,7 @@ public class TetrisSpawner : MonoBehaviour
     {
         this.board = board;
         this.blockPrefab = blockPrefab;
-       
+
     }
 
     public void SpawnPieceByType(PiecesType? overrideType = null)
@@ -29,6 +30,9 @@ public class TetrisSpawner : MonoBehaviour
             GameObject block = Instantiate(blockPrefab, pos, Quaternion.identity, pieceGO.transform);
             block.GetComponent<Block>()?.Initialize(board);
         }
+        // Optionally, you can add logic to select and highlight the piece after spawning
+        //board.SelectPiece(controller);
+        
     }
     public void SetSpawnPoint(Transform spawnPoint)
     {
@@ -36,6 +40,9 @@ public class TetrisSpawner : MonoBehaviour
     }
 
 }
+
+
+    // Wait for the piece to reach the target grid
     // private void SpawnPiece()
     // {
     //     GameObject pieceObject = new GameObject(pieceData.pieceName);
