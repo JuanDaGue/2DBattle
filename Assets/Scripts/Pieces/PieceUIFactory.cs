@@ -1,11 +1,17 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class PieceUIFactory : MonoBehaviour
 {
     [Header("UI References")]
-    public RectTransform piecesUI;           // Parent container inside Canvas
+    public RectTransform piecesUI;
+    public List<RectTransform> piecesUIList = new List<RectTransform>(2);
     public RectTransform blockPrefab;        // Prefab must be a UI Image (RectTransform)
+
+    [Header("World Object")]
+    public GameObject worldObjectPrefab;     // Prefab for the 3D object that follows the UI
+    public Camera gameCamera;                // Camera that views the 3D world
 
     [Header("Layout")]
     public float blockSize = 50f;            // size in pixels for each block
@@ -55,8 +61,22 @@ public class PieceUIFactory : MonoBehaviour
         pieceRect.pivot = new Vector2(0.5f, 0.5f);
         pieceRect.anchoredPosition = Vector2.zero;
         pieceRect.sizeDelta = Vector2.zero;
-        Button pieceButton = pieceGO.AddComponent<Button>();
-        pieceButton.onClick.AddListener(() => OnPieceClicked());
+
+        // Add draggable component
+        DraggablePiece draggable = pieceGO.AddComponent<DraggablePiece>();
+        draggable.gameCamera = gameCamera;
+
+        // Create world object if prefab is provided
+        if (worldObjectPrefab != null)
+        {
+            GameObject worldObj = Instantiate(worldObjectPrefab);
+            worldObj.name = $"{instanceName ?? type.ToString()}_WorldObject";
+            worldObj.SetActive(false); // Hide initially
+
+            // Link the world object to the UI element
+            draggable.worldObject = worldObj;
+        }
+
         // Instantiate blocks
         float stepX = blockSize + spacing.x;
         float stepY = blockSize + spacing.y;
@@ -87,31 +107,20 @@ public class PieceUIFactory : MonoBehaviour
     }
 
     /// <summary>
-    /// Create piece and place the group at a custom anchoredPosition inside the piecesUI.
-    /// piecesUI must be the parent. anchoredPos is in local pixels relative to piecesUI pivot.
-    /// </summary>
-    public RectTransform CreatePieceAt(PiecesType type, Vector2 anchoredPos, Color? color = null, string instanceName = null)
-    {
-        var piece = CreatePiece(type, color, instanceName);
-        if (piece != null) piece.anchoredPosition = anchoredPos;
-        return piece;
-    }
-
-    /// <summary>
-    /// Destroy all children inside piecesUI (useful to clear previous piece).
+    /// Removes all child objects from the piecesUI container.
     /// </summary>
     public void ClearPieces()
     {
         if (piecesUI == null) return;
-        for (int i = piecesUI.childCount - 1; i >= 0; --i)
+        for (int i = piecesUI.childCount - 1; i >= 0; i--)
         {
-            var child = piecesUI.GetChild(i);
-            Destroy(child.gameObject);
+            DestroyImmediate(piecesUI.GetChild(i).gameObject);
         }
     }
-    
-      private void OnPieceClicked()
+    public void SetcurrentPiece(int index)
     {
-        Debug.Log("Dragging");
+        if (index < 0 || index >= piecesUIList.Count) return;
+        piecesUI = piecesUIList[index];
     }
+    // ... rest of your existing methods ...
 }

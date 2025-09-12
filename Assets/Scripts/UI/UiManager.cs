@@ -16,14 +16,14 @@ public class UiManager : MonoBehaviour
 
     public List<Image> ManaImages = new List<Image>();
 
-
+    public List<CanvasGroup> CanvasGroupcanvas = new List<CanvasGroup>(2);
     // Add this method to switch camera focus
     void Start()
     {
         gameManager = FindFirstObjectByType<GameManager>();
 
         playerNameText.text = player.PlayerName;
-        
+
     }
 
     // Update is called once per frame
@@ -53,7 +53,7 @@ public class UiManager : MonoBehaviour
             }
         }
     }
-    
+
     //Update Score Text
     private void UpdateScoreText()
     {
@@ -67,6 +67,23 @@ public class UiManager : MonoBehaviour
         playerScoreText = FindFirstObjectByType<TextMeshProUGUI>();
         gameStateText = FindFirstObjectByType<TextMeshProUGUI>();
         UpdateLifeImages();
-        UpdateScoreText();           
+        UpdateScoreText();
     }
+    public void SetGameStateText(string message)
+    {
+        if (gameStateText != null)
+        {
+            gameStateText.text = message;
+        }
+    }
+    public void SetCanvasGroupAlpha(int index, float alpha)
+    {
+        if (index >= 0 && index < CanvasGroupcanvas.Count)
+        {
+            CanvasGroupcanvas[index].alpha = alpha;
+        }
+    }   
+
+    
+    
 }

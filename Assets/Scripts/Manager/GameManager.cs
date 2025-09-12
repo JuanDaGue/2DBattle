@@ -27,7 +27,8 @@ public class GameManager : MonoBehaviour
     [Header("Player Data")]
     [SerializeField] private List<Player> playerDataList = new List<Player>();
     [SerializeField] private List<Color> playerColors = new List<Color>();
-    
+    public PieceUIFactory pieceUIFactory;
+
     private Player currentPlayer;
     private DiceRoller diceRoller;
     private CamerasManager camerasManager;
@@ -172,18 +173,30 @@ public class GameManager : MonoBehaviour
         if (playerIndex < playerDataList.Count)
         {
             currentPlayer = playerDataList[playerIndex];
-            Debug.Log($"It's {currentPlayer.PlayerName}'s turn (ID: {currentPlayer.PlayerID})");
-            
+            //Debug.Log($"It's {currentPlayer.PlayerName}'s turn (ID: {currentPlayer.PlayerID})");
+
             if (camerasManager != null)
             {
                 camerasManager.SwitchCameraToPlayer(currentPlayer.PlayerID);
+                //camerasManager.SetCameraMode(CamerasManager.CameraMode.Middle); 
             }
-            
+
             if (uiManager != null)
             {
                 uiManager.Initialize(currentPlayer);
             }
         }
+        if (playerIndex == 1)
+        {
+            uiManager.SetCanvasGroupAlpha(0, 0f);
+            uiManager.SetCanvasGroupAlpha(1, 1f);
+        }
+        else
+        {
+            uiManager.SetCanvasGroupAlpha(1, 0f);
+            uiManager.SetCanvasGroupAlpha(0, 1f);
+        }
+        
     }
 
     private IEnumerator RollDice()
@@ -193,6 +206,8 @@ public class GameManager : MonoBehaviour
             diceRoller.RollDice();
             yield return new WaitUntil(() => diceRoller.HasResult);
             currentDiceRoll = diceRoller.GetResult();
+            diceRoller.SetManaToCurrentPlayer(currentPlayer);
+            Debug.Log($"Dice rolled: {currentDiceRoll}");
         }
         yield return null;
     }
@@ -210,14 +225,19 @@ public class GameManager : MonoBehaviour
 
     private void SpawnTetromino()
     {
+        
         if (pieceSpawners != null && currentPlayer != null)
         {
             int spawnerIndex = currentPlayer.PlayerID - 1;
             if (spawnerIndex < tetrominoSpawnPoints.Count)
             {
+                PiecesType typePiece = PieceShapes.GetRandomPieceType();
                 pieceSpawners.SetSpawnPoint(tetrominoSpawnPoints[spawnerIndex]);
-                pieceSpawners.SpawnPieceByType();
-                
+                pieceUIFactory.SetcurrentPiece(spawnerIndex);
+                pieceSpawners.SpawnPieceByType(typePiece);
+                pieceUIFactory.CreatePiece(typePiece, color: null, instanceName:"Piece" + typePiece);
+
+    
             }
         }
     }

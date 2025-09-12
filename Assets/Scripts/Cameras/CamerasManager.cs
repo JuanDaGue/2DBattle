@@ -14,25 +14,25 @@ public class CamerasManager : MonoBehaviour
     public float zoomSpeed = 2f;
     public float offsetX = 0f;
     public float offsetY = 15f;
-    
+
     // Camera configuration parameters
     private Vector2 farCameraPosition = new Vector2(15f, 25f);
     private float farCameraSize = 30f;
-    
+
     private Vector2 middleCameraMinPosition = new Vector2(5f, 5f);
     private Vector2 middleCameraMaxPosition = new Vector2(25f, 45f);
     private float middleCameraSize = 10f;
-    
+
     private Vector2 nearCameraMinPosition = new Vector2(0f, 0f);
     private Vector2 nearCameraMaxPosition = new Vector2(30f, 50f);
     private float nearCameraSize = 5f;
-    
+
     private Transform currentTarget;
     private CameraMode currentCameraMode = CameraMode.Middle;
-    private float aux=1f;
-    
+    private float aux = 1f;
+
     // Enum to track current camera mode
-    private enum CameraMode
+    public enum CameraMode
     {
         Far,
         Middle,
@@ -44,7 +44,7 @@ public class CamerasManager : MonoBehaviour
         mainCamera.orthographicSize = middleCameraSize;
         ApplyCameraSettings();
     }
-    
+
     public void InitializeCamera(GameManager gameManager)
     {
         this.gameManager = gameManager;
@@ -66,6 +66,7 @@ public class CamerasManager : MonoBehaviour
         }
 
         mainCamera.transform.position = targetPosition;
+        SetCameraMode(CameraMode.Middle);
     }
 
     private Vector3 CalculateTargetPosition(Transform target)
@@ -83,9 +84,9 @@ public class CamerasManager : MonoBehaviour
     private void ValidateTargetPosition(ref Vector3 targetPosition)
     {
         if (currentCameraMode == CameraMode.Far) return;
-        
+
         Vector2 minPosition, maxPosition;
-        
+
         if (currentCameraMode == CameraMode.Middle)
         {
             minPosition = middleCameraMinPosition;
@@ -96,25 +97,29 @@ public class CamerasManager : MonoBehaviour
             minPosition = nearCameraMinPosition;
             maxPosition = nearCameraMaxPosition;
         }
-        
+
         targetPosition.x = Mathf.Clamp(targetPosition.x, minPosition.x, maxPosition.x);
         targetPosition.y = Mathf.Clamp(targetPosition.y, minPosition.y, maxPosition.y);
     }
 
     public void SwitchCameraToPlayer(int playerId)
     {
+        if (playerId == 1)
+        {
+            aux = 1f;
+        }
+        else
+        {
+            aux = -1f;
+        }
         if (playerId - 1 < cameraTargets.Count && cameraTargets[playerId - 1] != null)
         {
             currentTarget = cameraTargets[playerId - 1];
             StartCoroutine(MoveCameraToTarget(currentTarget));
         }
-        if(playerId==1){
-            aux=1f;
-        }
-        else{
-            aux=-1f;
-        }
-        //Debug.Log("aux"+ aux);
+        Debug.Log("aux " + aux);
+        // SetCameraMode(CameraMode.Middle);
+        // ApplyCameraSettings();
     }
 
     public void Update()
@@ -123,11 +128,11 @@ public class CamerasManager : MonoBehaviour
         UpdateOffset();
         UpdateCameraPosition();
     }
-    
+
     private void HandleCameraModeChange()
     {
         float scroll = Input.GetAxis("Mouse ScrollWheel");
-        
+
         if (scroll > 0) // Scrolling up - zoom out
         {
             if (currentCameraMode == CameraMode.Near)
@@ -155,24 +160,30 @@ public class CamerasManager : MonoBehaviour
             }
         }
     }
-    
+
     private void ApplyCameraSettings()
     {
         switch (currentCameraMode)
         {
             case CameraMode.Far:
                 mainCamera.orthographicSize = farCameraSize;
-                offsetY=0f;
+                offsetY = 0f;
                 break;
             case CameraMode.Middle:
                 mainCamera.orthographicSize = middleCameraSize;
-                offsetY=7.5f*aux;
+                offsetY = 7.5f * aux;
                 break;
             case CameraMode.Near:
                 mainCamera.orthographicSize = nearCameraSize;
-                offsetY=3.5f*aux;
+                offsetY = 3.5f * aux;
                 break;
         }
+        // // Immediately update camera position to avoid lag
+        // if (currentTarget != null)
+        // {
+        //     UpdateCameraPosition();
+             Debug.Log(" Offset Y: " + offsetY);
+        // }
     }
 
     private void UpdateOffset()
@@ -211,5 +222,14 @@ public class CamerasManager : MonoBehaviour
             targetPosition,
             cameraSmoothSpeed * Time.deltaTime
         );
+    }
+    public void SetCameraMode(CameraMode mode)
+    {
+        currentCameraMode = mode;
+        ApplyCameraSettings();
+
+
+
+
     }
 }

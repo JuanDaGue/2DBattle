@@ -32,6 +32,7 @@ public class Tile : MonoBehaviour
     public void OnMouseUp()
     {
         //board.TileUp(this);
-        this.GetComponent<SpriteRenderer>().color = Color.white;
+        this.GetComponent<SpriteRenderer>().color = Color.blue;
+        
     }
 }

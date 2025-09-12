@@ -9,12 +9,12 @@ public class DiceRoller : MonoBehaviour
     [SerializeField] private int maxValue = 6;
     [SerializeField] private float rollDuration = 1f;
     [SerializeField] private TMPro.TextMeshProUGUI resultText;
-    
+
     private int result;
     private bool isRolling;
-    
+
     public bool HasResult => !isRolling;
-    
+
     public void RollDice()
     {
         if (!isRolling)
@@ -22,12 +22,12 @@ public class DiceRoller : MonoBehaviour
             StartCoroutine(RollDiceCoroutine());
         }
     }
-    
+
     private IEnumerator RollDiceCoroutine()
     {
         isRolling = true;
         float endTime = Time.time + rollDuration;
-        
+
         // Visual rolling effect
         while (Time.time < endTime)
         {
@@ -35,24 +35,32 @@ public class DiceRoller : MonoBehaviour
             UpdateUI(result);
             yield return null;
         }
-        
+
         isRolling = false;
         Debug.Log($"Dice roll result: {result}");
     }
-    
+
     public int GetResult() => result;
-    
+
     public void ResetDice()
     {
         result = 0;
         UpdateUI(0);
     }
-    
+
     public void UpdateUI(int value)
     {
         if (resultText != null)
         {
             resultText.text = value.ToString();
+        }
+    }
+    
+    public void SetManaToCurrentPlayer(Player player)
+    {
+        if (player != null)
+        {
+            player.AddMana(result);
         }
     }
 }
